@@ -7,7 +7,7 @@ import { hideBin } from 'yargs/helpers'
 import {
   FetchLogsToCacheBatchCallback,
   FetchLogsBatchCallback,
-  LogCache
+  LogCache,
 } from '.'
 
 // Main async function

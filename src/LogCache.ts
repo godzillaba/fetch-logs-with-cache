@@ -240,7 +240,11 @@ export class LogCache {
     }
 
     // Set blocks to 'earliest' and 'finalized' if not provided
-    const strictFilter = await LogCache.toStrictFilter(provider, filter, 'finalized')
+    const strictFilter = await LogCache.toStrictFilter(
+      provider,
+      filter,
+      'finalized'
+    )
 
     const lastFinalizedBlock = await getFinalizedBlockNumber(provider)
     if (strictFilter.toBlock > lastFinalizedBlock) {
@@ -298,7 +302,11 @@ export class LogCache {
     // Set blocks to 'earliest' and 'latest' if not provided
     const strictFilter = await LogCache.toStrictFilter(provider, filter)
     const filterId = await LogCache.getFilterId(provider, filter)
-    const rows = this._selectLogs(filterId, strictFilter.fromBlock, strictFilter.toBlock)
+    const rows = this._selectLogs(
+      filterId,
+      strictFilter.fromBlock,
+      strictFilter.toBlock
+    )
     return rows.map(row => new ethers.Log(JSON.parse(row.data), provider))
   }
 
@@ -320,14 +328,14 @@ export class LogCache {
   ): Promise<ethers.Log[]> {
     // Get the number of the last finalized block
     const lastFinalizedBlock = (await provider.getBlock('finalized'))?.number
-  
+
     if (lastFinalizedBlock === undefined) {
       throw new Error('Invalid block')
     }
-  
+
     // Set blocks to 'earliest' and 'latest' if not provided
     const strictFilter = await LogCache.toStrictFilter(provider, filter)
-  
+
     // Fetch and cache logs for finalized blocks
     await this.fetchLogsToCache(
       provider,
@@ -338,16 +346,13 @@ export class LogCache {
       pageSize,
       finalizedLogsCallback
     )
-  
+
     // Read cached logs for finalized blocks
-    const logs = await this.readLogsFromCache(
-      provider,
-      {
-        ...strictFilter,
-        toBlock: Math.min(strictFilter.toBlock, lastFinalizedBlock),
-      },
-    )
-  
+    const logs = await this.readLogsFromCache(provider, {
+      ...strictFilter,
+      toBlock: Math.min(strictFilter.toBlock, lastFinalizedBlock),
+    })
+
     // If the requested toBlock is beyond the last finalized block,
     // fetch logs for unfinalized blocks directly (without caching)
     if (strictFilter.toBlock > lastFinalizedBlock) {
@@ -360,11 +365,11 @@ export class LogCache {
         pageSize,
         unfinalizedLogsCallback
       )
-  
+
       // Combine finalized (cached) logs with unfinalized logs
       logs.push(...unfinalizedLogs)
     }
-  
+
     return logs
   }
 
@@ -389,31 +394,34 @@ export class LogCache {
 
     // Convert the filter to a strict filter
     const strictFilter = await LogCache.toStrictFilter(provider, filter)
-  
+
     let fromBlock = strictFilter.fromBlock
-  
+
     const logs: ethers.Log[] = []
     while (fromBlock <= strictFilter.toBlock) {
       // Calculate the end block for this batch
-      const thisToBlock = Math.min(fromBlock + pageSize - 1, strictFilter.toBlock)
-  
+      const thisToBlock = Math.min(
+        fromBlock + pageSize - 1,
+        strictFilter.toBlock
+      )
+
       // Fetch logs for the current batch
       const thisBatchLogs = await provider.getLogs({
         ...filter,
         fromBlock,
         toBlock: thisToBlock,
       })
-  
+
       // Add the fetched logs to the overall logs array
       logs.push(...thisBatchLogs)
-  
+
       // Call the batch callback if provided
       await batchCallback?.(logs, thisBatchLogs, fromBlock, thisToBlock)
-  
+
       // Move to the next batch
       fromBlock = thisToBlock + 1
     }
-  
+
     return logs
   }
 
@@ -447,8 +455,14 @@ export class LogCache {
     filter: Filter,
     defaultToBlock: ethers.BlockTag = 'latest'
   ): Promise<StrictFilter> {
-    const fromBlock = await tagToNumber(provider, filter.fromBlock || 'earliest')
-    const toBlock = await tagToNumber(provider, filter.toBlock || defaultToBlock)
+    const fromBlock = await tagToNumber(
+      provider,
+      filter.fromBlock || 'earliest'
+    )
+    const toBlock = await tagToNumber(
+      provider,
+      filter.toBlock || defaultToBlock
+    )
 
     return {
       ...filter,
