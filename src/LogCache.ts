@@ -311,7 +311,7 @@ export class LogCache {
   }
 
   /**
-   * Gets logs for the given filter, using cache for finalized blocks and fetching for unfinalized blocks
+   * Gets logs for the given filter, using the cache for finalized blocks but not unfinalized blocks
    * @param provider - Ethereum provider
    * @param filter - Filter object - fromBlock and toBlock default to 'earliest' and 'latest'
    * @param pageSize - Number of blocks to fetch in each batch
